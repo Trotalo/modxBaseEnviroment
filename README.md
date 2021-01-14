@@ -16,6 +16,16 @@ developing modX extras.
 3. For local development you'll need to generate the ssl selfsigned 
    certificates, [here is a guide on how to do so](https://medium.com/the-new-control-plane/generating-self-signed-certificates-on-windows-7812a600c2d8)
    and place the `ssl.crt` and `ssl.key` files inside the certs folder.
+4. Make sure docker has the right permissions to access local hdd resources;
+   both the webserver and database images uses local volumes to persist changes,
+   in order to achieve this follow the next steps:
+   1. Inside the freshly downloaded repo folder, create an 'html' and 'mysql' folders
+   2. Open the Docker dashboard from the try icon
+   3. Click the cog icon on the top right side, its next to the bug icon
+   4. Click the "Resources" option from the left side options
+   5. Select the "FILE SHARING" option from the values displayed under "Resources"
+   6. On the resources list, click the '+' sign, and the both folders you created
+   on step 1
 
 
 ## Using this image
@@ -38,11 +48,30 @@ docker-compose run
 ```
 
 4. The first time you'll run the container it'll take some time while it 
-   downloads and installs the different components.
+   downloads and installs the different components, at the end you should see
+   a line similar to this one
+```sh
+web_1  | [Thu Jan 14 13:27:32.027113 2021] [core:notice] [pid 1] AH00094: Command line: 'apache2 -D FOREGROUND'
+```   
 
+5. Check that everything is working as expected, for this open `https://xxx.xxx.xxx.xxx/`
+replace the x's with your actual ip address.
 
 ## Developing with this image
 
-After the installation its completed, we are ready to start developing, 
-for this, start creating your first components inside modx, and when you are
-ready to test, run
+1. After the installation its completed, we are ready to start developing, 
+for this, start by adding this folder to your preferred IDE
+2. Create any element needed inside the ModX admin, and once you are finished,
+open a terminal and run:  
+`docker exec -ti modxbaseenviroment_web_1 sh -c "cd /var/www/html && Gitify extract"`
+3. You'll see a new `_data` folder inside the html folder, there you can find
+all the plain files extracted from ModX for you to work directly with your preferred IDE
+4. When you are done with the changes on the files, run the command:  
+`docker exec -ti modxbaseenviroment_web_1 sh -c "cd /var/www/html && Gitify build && rm -fr /var/www/html/core/cache"`  
+This will have your changes commited into ModX.  
+Depending on the IDE you are using, you can add this command as an action
+when you press the save button, for example for VSCode, you can follow 
+[this tutorial](https://medium.com/better-programming/automatically-execute-bash-commands-on-save-in-vs-code-7a3100449f63)
+to have the command called everytime you save a file in your IDE.
+5. Make sure to add the `_data` folder to git and commit those to the repo.
+6. Follow the standard GIT workflow defined on the best practices manual.
