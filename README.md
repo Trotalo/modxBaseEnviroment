@@ -16,7 +16,8 @@ developing modX extras.
 3. For local development you'll need to generate the ssl selfsigned 
    certificates, [here is a guide on how to do so](https://medium.com/the-new-control-plane/generating-self-signed-certificates-on-windows-7812a600c2d8)
    and place the `ssl.crt` and `ssl.key` files inside the certs folder.
-4. Make sure docker has the right permissions to access local hdd resources;
+4. Make sure docker has the right permissions to access local hdd resources,  
+   this only applies for old windows containers, for latest WSL, got to step 5;
    both the webserver and database images uses local volumes to persist changes,
    in order to achieve this follow the next steps:
    1. Inside the freshly downloaded repo folder, create an 'html' and 'mysql' folders
@@ -26,6 +27,11 @@ developing modX extras.
    5. Select the "FILE SHARING" option from the values displayed under "Resources"
    6. On the resources list, click the '+' sign, and the both folders you created
    on step 1
+5. Follow the manual wsl installation steps from the [microsoft site](https://docs.microsoft.com/en-us/windows/wsl/install-win10#manual-installation-steps)
+   1. Make sure to select the plain 'Ubuntu' installation
+   2. Follow the manual until you reach the following message  
+   `CONGRATULATIONS! You've successfully installed and set up a Linux distribution that is completely integrated with your Windows operating system!`  
+6. Go to Docker -> dashboard -> settings -> resources, and check that your new ubuntu image is listed, the click the switch next to it, and we'll be ready to go!
 
 
 ## Using this image

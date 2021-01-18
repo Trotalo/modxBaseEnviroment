@@ -1,6 +1,6 @@
 FROM php:7.3-apache
 
-MAINTAINER Yanni Sanmiguel <info@ysanmiguel.com> (@vh)
+MAINTAINER Camilo Casadiego <camilo.casadiego@trotalo.com> (@vh)
 
 LABEL description="Image based up ont https://github.com/modxcms/docker-modx to hold PR learning site"
 
