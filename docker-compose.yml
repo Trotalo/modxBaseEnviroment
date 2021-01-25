@@ -9,6 +9,7 @@ services:
       - '443:443'
       - '80:80'
     environment:
+      XDEBUG_SESSION: wtf
       MODX_VERSION: 2.8.1
       MODX_DB_HOST: 'mysql:3306'
       MODX_DB_PASSWORD: modx
@@ -18,9 +19,9 @@ services:
       MODX_ADMIN_USER: admin
       MODX_ADMIN_PASSWORD: admin
       MODX_ADMIN_EMAIL: admin@admin.com
-      MODX_SERVER_ROUTE: 192.168.0.104
+      MODX_SERVER_ROUTE: 172.25.247.114
     volumes:
-      - './html:/var/www/html'
+      - '~/development/modxBaseEnviroment/html:/var/www/html'
   db:
     image: 'mysql:8.0.22'
     environment:
@@ -32,4 +33,4 @@ services:
       - '3306:3306'
     command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - './mysql:/var/lib/mysql'
+      - '~/development/modxBaseEnviroment/mysql:/var/lib/mysql'

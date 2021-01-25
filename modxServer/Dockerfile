@@ -1,8 +1,8 @@
 FROM php:7.3-apache
 
-MAINTAINER Camilo Casadiego <camilo.casadiego@trotalo.com> (@vh)
+LABEL MODX_BASE_ENVIROMENT=1.0
 
-LABEL description="Image based up ont https://github.com/modxcms/docker-modx to hold PR learning site"
+LABEL description="Image based up ont https://github.com/modxcms/docker-modx to a basic image to work on a modxMoster project"
 
 #Arguments and variables definitions
 ARG MODX_VERSION=2.8.1
@@ -26,6 +26,7 @@ RUN mkdir -p $TMP_STORE/ \
 ADD certs/ssl.crt /etc/apache2/ssl/ssl.crt
 ADD certs/ssl.key /etc/apache2/ssl/ssl.key
 ADD ./configFiles/default /etc/apache2/sites-available/000-default.conf
+
 RUN echo "Running development enviroment" \
     && a2enmod ssl \
     && mkdir -p /var/run/apache2/ \
@@ -39,14 +40,13 @@ RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgm
 	&& docker-php-ext-install gd soap opcache mysqli pdo pdo_mysql gmp \
 	&& curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install Composer
-#RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
- #   && git clone https://github.com/modmore/Gitify.git $TMP_STORE_ARG/Gitify
-    #&& cd $TMP_STORE_ARG/Gitify \
-    #&& composer install --no-dev \
-    #&& mv $TMP_STORE_ARG/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE_ARG/Gitify/vendor/kbjr/git.php/git.php \
-    #&& composer install --no-dev \
-    #&& chmod +x Gitify
+# Configure
+RUN pecl install xdebug && \
+    docker-php-ext-enable xdebug
+    
+# We add the rigth xdebug config
+RUN mkdir '/var/www/html/Standard input code'
+ADD configFiles/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # set recommended PHP.ini settings
 # see https://secure.php.net/manual/en/opcache.installation.php
@@ -76,16 +76,9 @@ RUN curl -o modx.zip -SL http://modx.com/download/direct/modx-${MODX_VERSION}-pl
   && rm modx.zip \
 	&& chown -R www-data:www-data /usr/src/modx
 
-
-
-#Switched to single run to save one step, can be used to work with local files instead of redownload
-#ADD ./backup/core.zip $TMP_STORE/core.zip
-#ADD ./backup/siteFiles.zip $TMP_STORE/siteFiles.zip
-
 ADD ./configFiles/htaccess.site $HT_FILENAME
 ADD ./configFiles/modxExtras $TMP_STORE/modxExtras
 ADD ./.gitify $TMP_STORE/.gitify
-#ADD ./PRBackup/modx.sql $DB_FILENAME
 
 #update mutiple ht acces and database backup files
 RUN sed -i "s,SERVER_ADDRESS,$MODX_SERVER_ROUTE,g" $HT_FILENAME
