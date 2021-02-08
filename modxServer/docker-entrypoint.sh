@@ -70,7 +70,7 @@ if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_strin
 $mysql->close();
 EOPHP
 
-	if ! [ -e index.php -a -e core/config/config.inc.php ]; then
+	if ! [ -e index.php -a -e $MODX_CORE_LOCATION/config/config.inc.php ]; then
 		echo >&2 "MODX not found in $(pwd) - copying now..."
 
 		if [ "$(ls -A)" ]; then
@@ -81,6 +81,10 @@ EOPHP
 		tar cf - --one-file-system -C /usr/src/modx . | tar xf -
 
     echo >&2 "Complete! MODX has been successfully copied to $(pwd)"
+
+    #Now we move the core to the configured location
+    echo >&2 "Moving core to $MODX_CORE_LOCATION"
+    mv /var/www/html/core  $MODX_CORE_LOCATION
 
 		: ${MODX_ADMIN_USER:='admin'}
 		: ${MODX_ADMIN_PASSWORD:='admin'}
@@ -108,7 +112,7 @@ EOPHP
 	<cmspassword>$MODX_ADMIN_PASSWORD</cmspassword>
 	<cmsadminemail>$MODX_ADMIN_EMAIL</cmsadminemail>
 
-	<core_path>/var/www/html/core/</core_path>
+	<core_path>$MODX_CORE_LOCATION</core_path>
 	<context_mgr_path>/var/www/html/manager/</context_mgr_path>
 	<context_mgr_url>/manager/</context_mgr_url>
 	<context_connectors_path>/var/www/html/connectors/</context_connectors_path>
@@ -121,7 +125,7 @@ EOPHP
 EOF
 		chown www-data:www-data setup/config.xml
 
-    sudo -u www-data php setup/index.php --installmode=new
+    sudo -u www-data php setup/index.php --installmode=new --core_path=$MODX_CORE_LOCATION/
     echo >&2 "We copy the ht access file"
     mv /var/www/html/.htaccess /var/www/html/.htaccess.base
     cp -rfp $HT_FILENAME /var/www/html/
@@ -151,9 +155,23 @@ EOF
       Y | Gitify package:install "$line"
     done < "$MODX_EXTRAS"
   else
-		if [ $UPGRADE ]; then
-			echo >&2 "Existing modx installation found, finishing startup"
+    #If ModX is present, just install gitify 
+		echo >&2 "Now we configure the Gitify command "
+    # mkdir $TMP_STORE
+    git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
+    cd $TMP_STORE/Gitify
+    if (composer install --no-dev) then
+      echo >&2 "Worked at first"
+    else
+      echo >&2 "updating file and reinstalling"
+      mv $TMP_STORE/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE/Gitify/vendor/kbjr/git.php/git.php
+      composer install --no-dev
     fi
+    chmod +x Gitify
+    cd /usr/bin/
+    ln -s /tmp/modx/Gitify/Gitify Gitify
+    # We move the gitify config file
+    mv $TMP_STORE/.gitify /var/www/html/.gitify
 	fi
 fi
 
