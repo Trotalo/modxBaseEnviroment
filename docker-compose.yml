@@ -11,7 +11,7 @@ services:
     environment:
       XDEBUG_SESSION: wtf
       MODX_VERSION: 2.8.1
-      MODX_CORE_LOCATION: /var/www/core
+      MODX_CORE_LOCATION: /var/www/coreM0dXF1L3s
       MODX_DB_HOST: 'mysql:3306'
       MODX_DB_PASSWORD: modx
       MODX_DB_USER: modx
@@ -20,7 +20,7 @@ services:
       MODX_ADMIN_USER: admin
       MODX_ADMIN_PASSWORD: admin
       MODX_ADMIN_EMAIL: admin@admin.com
-      MODX_SERVER_ROUTE: 172.25.247.114
+      MODX_SERVER_ROUTE: 192.168.0.104
     volumes:
       - '~/development/pernondRicardSite/www:/var/www'
   db:

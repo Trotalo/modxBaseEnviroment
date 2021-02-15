@@ -77,7 +77,9 @@ RUN curl -o modx.zip -SL http://modx.com/download/direct/modx-${MODX_VERSION}-pl
 	&& chown -R www-data:www-data /usr/src/modx
 
 ADD ./configFiles/htaccess.site $HT_FILENAME
-ADD ./configFiles/modxExtras $TMP_STORE/modxExtras
+# Commented BC we added this file to each project's repository
+# ADD ./configFiles/modxExtras $TMP_STORE/modxExtras
+
 ADD ./.gitify $TMP_STORE/.gitify
 
 #update mutiple ht acces and database backup files

@@ -3,8 +3,9 @@ set -e
 
 TMP_STORE=/tmp/modx
 HT_FILENAME=$TMP_STORE/siteConfig/.htaccess
-MODX_EXTRAS=$TMP_STORE/modxExtras
+MODX_EXTRAS=/var/www/html/_data/modxExtras
 
+echo "Starting Modx container startup configuration"
 
 if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
 	if [ -n "$MYSQL_PORT_3306_TCP" ]; then
@@ -39,11 +40,11 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
 		echo >&2 '  (Also of interest might be MODX_DB_USER and MODX_DB_NAME.)'
 		exit 1
 	fi
+	echo >&2 "Creating connection!"
 
 	TERM=dumb php -- "$MODX_DB_HOST" "$MODX_DB_USER" "$MODX_DB_PASSWORD" "$MODX_DB_NAME" <<'EOPHP'
 <?php
 $stderr = fopen('php://stderr', 'w');
-
 list($host, $port) = explode(':', $argv[1], 2);
 
 $maxTries = 10;
@@ -70,7 +71,7 @@ if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_strin
 $mysql->close();
 EOPHP
 
-	if ! [ -e index.php -a -e $MODX_CORE_LOCATION/config/config.inc.php ]; then
+  if ! [ -e index.php -a -e $MODX_CORE_LOCATION/config/config.inc.php ]; then
 		echo >&2 "MODX not found in $(pwd) - copying now..."
 
 		if [ "$(ls -A)" ]; then
@@ -154,25 +155,26 @@ EOF
       echo "Will install: " $line
       Y | Gitify package:install "$line"
     done < "$MODX_EXTRAS"
+  # fi
   else
-    #If ModX is present, just install gitify 
-		echo >&2 "Now we configure the Gitify command "
-    # mkdir $TMP_STORE
-    git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
-    cd $TMP_STORE/Gitify
-    if (composer install --no-dev) then
-      echo >&2 "Worked at first"
-    else
-      echo >&2 "updating file and reinstalling"
-      mv $TMP_STORE/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE/Gitify/vendor/kbjr/git.php/git.php
-      composer install --no-dev
+    echo >&2 "Modx its installed, checking for Gitify installation"
+    if ! [ -e $TMP_STORE/Gitify ]; then
+      echo >&2 "Installing Gitify command......"
+      # mkdir $TMP_STORE
+      git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
+      cd $TMP_STORE/Gitify
+      if (composer install --no-dev) then
+        echo >&2 "Worked at first"
+      else
+        echo >&2 "updating file and reinstalling"
+        mv $TMP_STORE/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE/Gitify/vendor/kbjr/git.php/git.php
+        composer install --no-dev
+      fi
+      chmod +x Gitify
+      cd /usr/bin/
+      ln -s /tmp/modx/Gitify/Gitify Gitify
     fi
-    chmod +x Gitify
-    cd /usr/bin/
-    ln -s /tmp/modx/Gitify/Gitify Gitify
-    # We move the gitify config file
-    mv $TMP_STORE/.gitify /var/www/html/.gitify
-	fi
+  fi
 fi
 
 exec "$@"
