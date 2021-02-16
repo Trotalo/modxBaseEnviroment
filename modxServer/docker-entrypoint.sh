@@ -146,8 +146,6 @@ EOF
     chmod +x Gitify
     cd /usr/bin/
     ln -s /tmp/modx/Gitify/Gitify Gitify
-    # We move the gitify config file
-    mv $TMP_STORE/.gitify /var/www/html/.gitify
     # We install the required plugins
     cd /var/www/html/
     while IFS= read -r line
