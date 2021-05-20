@@ -22,7 +22,7 @@ services:
       MODX_ADMIN_EMAIL: admin@admin.com
       MODX_SERVER_ROUTE: 192.168.0.104
     volumes:
-      - '~/development/pernondRicardSite/www:/var/www'
+      - '~/development/PROJECT_FOLDER_LOCATION/www:/var/www'
   db:
     image: 'mysql:8.0.22'
     environment:
@@ -34,4 +34,4 @@ services:
       - '3306:3306'
     command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - '~/development/pernondRicardSite/mysql:/var/lib/mysql'
+      - '~/development/PROJECT_FOLDER_LOCATION/mysql:/var/lib/mysql'
