@@ -148,11 +148,8 @@ EOF
     ln -s /tmp/modx/Gitify/Gitify Gitify
     # We install the required plugins
     cd /var/www/html/
-    while IFS= read -r line
-    do
-      echo "Will install: " $line
-      Y | Gitify package:install "$line"
-    done < "$MODX_EXTRAS"
+    Gitify package:install --all
+
   # fi
   else
     echo >&2 "Modx its installed, checking for Gitify installation"

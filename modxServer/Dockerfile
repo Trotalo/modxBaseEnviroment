@@ -33,7 +33,7 @@ RUN echo "Running development enviroment" \
     && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 # install the PHP extensions we need
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgmp-dev libxml2-dev git mariadb-client \
+RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgmp-dev libxml2-dev git mariadb-client vim \
     && rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h \
 	&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
