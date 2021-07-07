@@ -47,7 +47,7 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
 $stderr = fopen('php://stderr', 'w');
 list($host, $port) = explode(':', $argv[1], 2);
 
-$maxTries = 10;
+$maxTries = 50;
 do {
 	$mysql = new mysqli($host, $argv[2], $argv[3], '', (int)$port);
 	if ($mysql->connect_error) {
@@ -56,7 +56,7 @@ do {
 		if ($maxTries <= 0) {
 			exit(1);
 		}
-		sleep(3);
+		sleep(10);
 	}
 } while ($mysql->connect_error);
 
@@ -149,6 +149,7 @@ EOF
     # We install the required plugins
     cd /var/www/html/
     Gitify package:install --all
+    #Finally we call the database creation script
 
   # fi
   else
