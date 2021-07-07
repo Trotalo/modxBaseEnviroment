@@ -125,7 +125,7 @@ EOPHP
 </modx>
 EOF
 		chown www-data:www-data setup/config.xml
-
+    echo >&2 "Starting modx installation, be patient, this can take some time"
     sudo -u www-data php setup/index.php --installmode=new --core_path=$MODX_CORE_LOCATION/
     echo >&2 "We copy the ht access file"
     mv /var/www/html/.htaccess /var/www/html/.htaccess.base
