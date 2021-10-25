@@ -7,7 +7,7 @@ LABEL description="Image based up ont https://github.com/modxcms/docker-modx to 
 #Arguments and variables definitions
 ARG MODX_VERSION=2.8.1
 ARG MODX_SHA1=7dd95a25be5989a03ce58ef77adce79b341aa1f4
-ARG MODX_SERVER_ROUTE=192.168.0.104
+ARG MODX_SERVER_ROUTE=192.168.0.107
 ARG MODX_DB_NAME=modx
 ARG TMP_STORE_ARG=/tmp/modx
 

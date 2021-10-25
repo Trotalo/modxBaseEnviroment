@@ -143,9 +143,9 @@ EOF
       mv $TMP_STORE/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE/Gitify/vendor/kbjr/git.php/git.php
       composer install --no-dev
     fi
-    chmod +x Gitify
+    chmod +x bin/gitify
     cd /usr/bin/
-    ln -s /tmp/modx/Gitify/Gitify Gitify
+    ln -s /tmp/modx/Gitify/bin/gitify Gitify
     # We install the required plugins
     cd /var/www/html/
     Gitify package:install --all
@@ -169,9 +169,9 @@ EOF
         mv $TMP_STORE/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE/Gitify/vendor/kbjr/git.php/git.php
         composer install --no-dev
       fi
-      chmod +x Gitify
+      chmod +x bin/gitify
       cd /usr/bin/
-      ln -s /tmp/modx/Gitify/Gitify Gitify
+      ln -s /tmp/modx/Gitify/bin/gitify Gitify
     fi
   fi
 fi
