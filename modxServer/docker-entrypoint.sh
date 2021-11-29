@@ -136,24 +136,23 @@ EOF
     # mkdir $TMP_STORE
     git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
     cd $TMP_STORE/Gitify
-    if (composer install --no-dev) then
-      echo >&2 "Worked at first"
-    else
-      echo >&2 "updating file and reinstalling"
-      mv $TMP_STORE/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE/Gitify/vendor/kbjr/git.php/git.php
-      composer install --no-dev
-    fi
+    composer install --no-dev
+
     chmod +x bin/gitify
     cd /usr/bin/
     ln -s /tmp/modx/Gitify/bin/gitify Gitify
-    # We install the required plugins
     cd /var/www/html/
-    Gitify package:install --all
-    #Finally we call the database creation script
-    cd /var/www/html/modxMonster/modelConfig/
-    for f in *.gen; do
-      mv -- "$f" "${f%.xml.gen}.xml"
-    done
+    # We install the required plugins
+    if [ -e .gitify ]; then
+      Gitify package:install --all
+      #Finally we call the database creation script
+      cd /var/www/html/modxMonster/modelConfig/
+      for f in *.gen; do
+        mv -- "$f" "${f%.xml.gen}.xml"
+      done
+    fi
+
+
   # fi
   else
     echo >&2 "Modx its installed, checking for Gitify installation"
