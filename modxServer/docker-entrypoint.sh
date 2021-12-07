@@ -148,12 +148,15 @@ EOF
     ln -s /tmp/modx/Gitify/bin/gitify Gitify
     # We install the required plugins
     cd /var/www/html/
-    Gitify package:install --all
-    #Finally we call the database creation script
-    cd /var/www/html/modxMonster/modelConfig/
-    for f in *.gen; do
-      mv -- "$f" "${f%.xml.gen}.xml"
-    done
+    # first we check that there's agitify configuration
+    if [ -e .gitify  ]; then
+      Gitify package:install --all
+      #Finally we call the database creation script
+      cd /var/www/html/modxMonster/modelConfig/
+      for f in *.gen; do
+        mv -- "$f" "${f%.xml.gen}.xml"
+      done
+    fi
   # fi
   else
     echo >&2 "Modx its installed, checking for Gitify installation"
