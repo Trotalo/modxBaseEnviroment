@@ -9,14 +9,6 @@ data:
         primary:
             - context_key
             - key
-    template_variables:
-        class: modTemplateVar
-        primary: name
-    template_variables_access:
-        class: modTemplateVarTemplate
-        primary:
-            - tmplvarid
-            - templateid
     content:
         type: content
         exclude_keys:
@@ -62,9 +54,6 @@ data:
     namespaces:
         class: modNamespace
         primary: name
-    extension_packages:
-        class: modExtensionPackage
-        primary: namespace
     action:
         class: modAction
         primary: [id, namespace]
@@ -138,3 +127,8 @@ packages:
     modx.com:
         service_url: 'https://rest.modx.com/extras/'
         description: 'The official MODX transport provider for 3rd party components.'
+        packages:
+            - simpleacecodeeditor
+            - migx
+
+

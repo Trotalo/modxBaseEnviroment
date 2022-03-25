@@ -142,14 +142,16 @@ EOF
     cd /usr/bin/
     ln -s /tmp/modx/Gitify/bin/gitify Gitify
     cd /var/www/html/
-    # first we check that there's agitify configuration
+    # since its a new modx isntallation, use the default gitify file
+    cp $TMP_STORE/.gitify .
+    # first we check that there's a gitify configuration
     if [ -e .gitify  ]; then
       Gitify package:install --all
-      #Finally we call the database creation script
-      cd /var/www/html/modxMonster/modelConfig/
-      for f in *.gen; do
-        mv -- "$f" "${f%.xml.gen}.xml"
-      done
+      #This section was used to load the project database
+      #cd /var/www/html/modxMonster/modelConfig/
+      #for f in *.gen; do
+      #  mv -- "$f" "${f%.xml.gen}.xml"
+      #done
     fi
   # fi
   else

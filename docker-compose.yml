@@ -20,7 +20,7 @@ services:
       MODX_ADMIN_USER: admin
       MODX_ADMIN_PASSWORD: admin
       MODX_ADMIN_EMAIL: admin@admin.com
-      MODX_SERVER_ROUTE: YOUR_IP
+      MODX_SERVER_ROUTE: 192.168.0.107
     volumes:
       - './www:/var/www'
   db:
