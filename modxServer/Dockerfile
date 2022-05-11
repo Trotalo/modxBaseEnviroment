@@ -33,12 +33,14 @@ RUN echo "Running development enviroment" \
     && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 # install the PHP extensions we need
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgmp-dev libxml2-dev git mariadb-client vim \
+RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgmp-dev libxml2-dev git mariadb-client vim nodejs npm \
     && rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h \
 	&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
 	&& docker-php-ext-install gd soap opcache mysqli pdo pdo_mysql gmp \
-	&& curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+	&& curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && npm install -g @vue/cli \
+    && npm install -g vue
 
 # Configure
 RUN pecl install xdebug && \
@@ -84,8 +86,7 @@ ADD ./.gitify $TMP_STORE/.gitify
 
 #update mutiple ht acces and database backup files
 RUN sed -i "s,SERVER_ADDRESS,$MODX_SERVER_ROUTE,g" $HT_FILENAME
-    #&& sed -i "s,SERVER_ADDRESS,$MODX_SERVER_ROUTE,g" $DB_FILENAME \
-    #&& sed -i "s,DB_NAME,$MODX_DB_NAME,g" $DB_FILENAME
+
 
 #We copy the prod php ini
 #RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
