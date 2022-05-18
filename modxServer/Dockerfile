@@ -17,6 +17,8 @@ ENV CORE_BACKUP=$CORE_BACKUP_ARG
 ENV HT_FILENAME=$TMP_STORE/siteConfig/.htaccess
 ENV DB_FILENAME=$TMP_STORE/siteConfig/modx.sql
 
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
 RUN a2enmod rewrite
 
 RUN mkdir -p $TMP_STORE/ \
@@ -33,19 +35,41 @@ RUN echo "Running development enviroment" \
     && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 # install the PHP extensions we need
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgmp-dev libxml2-dev git mariadb-client vim nodejs npm \
+RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgmp-dev libxml2-dev git mariadb-client vim \
     && rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h \
 	&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
 	&& docker-php-ext-install gd soap opcache mysqli pdo pdo_mysql gmp \
-	&& curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && npm install -g @vue/cli \
+	&& curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+
+ENV NVM_DIR $TMP_STORE/nvm
+ENV NODE_VERSION 16.15.0
+
+RUN chown -R www-data:www-data /var/www/
+
+USER www-data
+RUN export XDG_CONFIG_HOME=$TMP_STORE \
+    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+#RUN chown -R www-data:www-data $NVM_DIR
+
+RUN source $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && nvm alias default $NODE_VERSION \
+    && nvm use default
+
+ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
+ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
+RUN npm install -g @vue/cli \
     && npm install -g vue
 
+USER root
 # Configure
 RUN pecl install xdebug && \
     docker-php-ext-enable xdebug
-    
+
 # We add the rigth xdebug config
 RUN mkdir '/var/www/html/Standard input code'
 ADD configFiles/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
@@ -65,10 +89,6 @@ RUN { \
 		echo 'date.timezone=GMT+0'; \
 	} > /usr/local/etc/php/conf.d/datetime.ini
 
-#Volumne usage
-#VOLUME /var/www/
-
-
 # Download specified modx version ${MODX_VERSION}
 RUN curl -o modx.zip -SL http://modx.com/download/direct/modx-${MODX_VERSION}-pl.zip \
 	&& echo "$MODX_SHA1 *modx.zip" | sha1sum -c - \
@@ -87,7 +107,6 @@ ADD ./.gitify $TMP_STORE/.gitify
 #update mutiple ht acces and database backup files
 RUN sed -i "s,SERVER_ADDRESS,$MODX_SERVER_ROUTE,g" $HT_FILENAME
 
-
 #We copy the prod php ini
 #RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
@@ -96,3 +115,4 @@ RUN ["chmod", "+x", "/entrypoint.sh"]
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]
+
