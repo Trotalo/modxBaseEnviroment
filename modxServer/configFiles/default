@@ -29,6 +29,7 @@
 </VirtualHost>
 
 <VirtualHost *:443>
+  Protocols h2 http/1.1
   SSLEngine on
   SSLCertificateFile /etc/apache2/ssl/ssl.crt
   SSLCertificateKeyFile /etc/apache2/ssl/ssl.key

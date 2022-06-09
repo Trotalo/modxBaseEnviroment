@@ -20,6 +20,7 @@ ENV DB_FILENAME=$TMP_STORE/siteConfig/modx.sql
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN a2enmod rewrite
+RUN a2enmod http2
 
 RUN mkdir -p $TMP_STORE/ \
     && chown -R www-data:www-data $TMP_STORE/
