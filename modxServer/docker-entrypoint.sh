@@ -48,17 +48,26 @@ $stderr = fopen('php://stderr', 'w');
 list($host, $port) = explode(':', $argv[1], 2);
 
 $maxTries = 50;
+$success = false;
 do {
-	$mysql = new mysqli($host, $argv[2], $argv[3], '', (int)$port);
-	if ($mysql->connect_error) {
-		fwrite($stderr, "\n" . 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . "\n");
-		--$maxTries;
-		if ($maxTries <= 0) {
-			exit(1);
-		}
-		sleep(10);
-	}
-} while ($mysql->connect_error);
+  try{
+    $mysql = new mysqli($host, $argv[2], $argv[3], '', (int)$port);
+    if ($mysql->connect_error) {
+      fwrite($stderr, "\n" . 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . "\n");
+      --$maxTries;
+      if ($maxTries <= 0) {
+        exit(1);
+      }
+      sleep(10);
+    } else {
+      $success = true;
+    }
+  } catch(mysqli_sql_exception $error) {
+    fwrite($stderr, "\nError connecting: $error \nWill retry $maxTries more times");
+    sleep(10);
+  }
+
+} while (!$success);
 
 if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_string($argv[4]) . '` ' .
 	'DEFAULT CHARACTER SET = \'utf8\' DEFAULT COLLATE \'utf8_general_ci\'')) {
@@ -84,8 +93,9 @@ EOPHP
     echo >&2 "Complete! MODX has been successfully copied to $(pwd)"
 
     #Now we move the core to the configured location
-    echo >&2 "Moving core to $MODX_CORE_LOCATION"
-    mv /var/www/html/core  $MODX_CORE_LOCATION
+    #core movement is deprecated on 3.0 ust secure using httaccess
+    #echo >&2 "Moving core to $MODX_CORE_LOCATION"
+    #mv /var/www/html/core  $MODX_CORE_LOCATION
 
 		: ${MODX_ADMIN_USER:='admin'}
 		: ${MODX_ADMIN_PASSWORD:='admin'}
@@ -113,7 +123,7 @@ EOPHP
 	<cmspassword>$MODX_ADMIN_PASSWORD</cmspassword>
 	<cmsadminemail>$MODX_ADMIN_EMAIL</cmsadminemail>
 
-	<core_path>$MODX_CORE_LOCATION</core_path>
+	<core_path>/var/www/html/core</core_path>
 	<context_mgr_path>/var/www/html/manager/</context_mgr_path>
 	<context_mgr_url>/manager/</context_mgr_url>
 	<context_connectors_path>/var/www/html/connectors/</context_connectors_path>
@@ -126,7 +136,8 @@ EOPHP
 EOF
 		chown www-data:www-data setup/config.xml
     echo >&2 "Starting modx installation, be patient, this can take some time"
-    sudo -u www-data php setup/index.php --installmode=new --core_path=$MODX_CORE_LOCATION/
+    #Removed --core_path=$MODX_CORE_LOCATION/ not supporte on 3.0
+    sudo -u www-data php setup/index.php --installmode=new
     echo >&2 "We copy the ht access file"
     mv /var/www/html/.htaccess /var/www/html/.htaccess.base
     cp -rfp $HT_FILENAME /var/www/html/

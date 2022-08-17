@@ -5,6 +5,8 @@ services:
       context: ./modxServer
     links:
       - 'db:mysql'
+    depends_on:
+      - db
     ports:
       - '443:443'
       - '80:80'
@@ -25,7 +27,7 @@ services:
     volumes:
       - './www:/var/www'
   db:
-    image: 'mysql:8.0.22'
+    image: 'mariadb:10.1'
     environment:
       MYSQL_ROOT_PASSWORD: mysql
       MYSQL_DATABASE: modx
@@ -35,4 +37,4 @@ services:
       - '3306:3306'
     command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - './mysql:/var/lib/mysql'
+      - './mariadb:/var/lib/mysql'
