@@ -153,6 +153,9 @@ EOF
       #  mv -- "$f" "${f%.xml.gen}.xml"
       #done
     fi
+    #Finally set the npm folder and permissions to enable npm install
+    mkdir /var/www/.npm
+    chown -R www-data:www-data /var/www/.npm
   # fi
   else
     echo >&2 "Modx its installed, checking for Gitify installation"
