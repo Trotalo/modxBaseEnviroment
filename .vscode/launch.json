@@ -10,7 +10,6 @@
           "externalConsole": false,
           "pathMappings": {
               "/var/www/html": "${workspaceRoot}/www/html",
-              "/var/www/coreM0dXF1L3s": "${workspaceRoot}/www/coreM0dXF1L3s",
           },
           "ignore": [
               "**/vendor/**/*.php"

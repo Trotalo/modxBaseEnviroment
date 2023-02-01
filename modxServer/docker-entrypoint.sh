@@ -48,17 +48,26 @@ $stderr = fopen('php://stderr', 'w');
 list($host, $port) = explode(':', $argv[1], 2);
 
 $maxTries = 50;
+$success = false;
 do {
-	$mysql = new mysqli($host, $argv[2], $argv[3], '', (int)$port);
-	if ($mysql->connect_error) {
-		fwrite($stderr, "\n" . 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . "\n");
-		--$maxTries;
-		if ($maxTries <= 0) {
-			exit(1);
-		}
-		sleep(10);
-	}
-} while ($mysql->connect_error);
+  try{
+    $mysql = new mysqli($host, $argv[2], $argv[3], '', (int)$port);
+    if ($mysql->connect_error) {
+      fwrite($stderr, "\n" . 'MySQL Connection Error: (' . $mysql->connect_errno . ') ' . $mysql->connect_error . "\n");
+      --$maxTries;
+      if ($maxTries <= 0) {
+        exit(1);
+      }
+      sleep(10);
+    } else {
+      $success = true;
+    }
+  } catch(mysqli_sql_exception $error) {
+    fwrite($stderr, "\nError connecting: $error \nWill retry $maxTries more times");
+    sleep(10);
+  }
+
+} while (!$success);
 
 if (!$mysql->query('CREATE DATABASE IF NOT EXISTS `' . $mysql->real_escape_string($argv[4]) . '` ' .
 	'DEFAULT CHARACTER SET = \'utf8\' DEFAULT COLLATE \'utf8_general_ci\'')) {
@@ -84,8 +93,9 @@ EOPHP
     echo >&2 "Complete! MODX has been successfully copied to $(pwd)"
 
     #Now we move the core to the configured location
-    echo >&2 "Moving core to $MODX_CORE_LOCATION"
-    mv /var/www/html/core  $MODX_CORE_LOCATION
+    #core movement is deprecated on 3.0 ust secure using httaccess
+    #echo >&2 "Moving core to $MODX_CORE_LOCATION"
+    #mv /var/www/html/core  $MODX_CORE_LOCATION
 
 		: ${MODX_ADMIN_USER:='admin'}
 		: ${MODX_ADMIN_PASSWORD:='admin'}
@@ -113,7 +123,7 @@ EOPHP
 	<cmspassword>$MODX_ADMIN_PASSWORD</cmspassword>
 	<cmsadminemail>$MODX_ADMIN_EMAIL</cmsadminemail>
 
-	<core_path>$MODX_CORE_LOCATION</core_path>
+	<core_path>/var/www/html/core</core_path>
 	<context_mgr_path>/var/www/html/manager/</context_mgr_path>
 	<context_mgr_url>/manager/</context_mgr_url>
 	<context_connectors_path>/var/www/html/connectors/</context_connectors_path>
@@ -126,36 +136,54 @@ EOPHP
 EOF
 		chown www-data:www-data setup/config.xml
     echo >&2 "Starting modx installation, be patient, this can take some time"
-    sudo -u www-data php setup/index.php --installmode=new --core_path=$MODX_CORE_LOCATION/
+    #Removed --core_path=$MODX_CORE_LOCATION/ not supporte on 3.0
+    sudo -u www-data php setup/index.php --installmode=new
     echo >&2 "We copy the ht access file"
     mv /var/www/html/.htaccess /var/www/html/.htaccess.base
     cp -rfp $HT_FILENAME /var/www/html/
     chown www-data:www-data $HT_FILENAME
+    echo >&2 "Check if gitify is present"
+    if [ ! -d "$TMP_STORE/Gitify" ]; then
+      echo "$TMP_STORE/Gitify does not exist."
+      echo >&2 "Now we configure the Gitify command "
+      # mkdir $TMP_STORE
+      git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
+      cd $TMP_STORE/Gitify
+      composer install --no-dev
+      chmod +x bin/gitify
+      # since its a new modx isntallation, use the default gitify file
+      cp $TMP_STORE/.gitify .
+      # first we check that there's a gitify configuration
+      #if [ -e .gitify  ]; then
+        # Gitify package:install --all
+        #This section was used to load the project database
+        #cd /var/www/html/modxMonster/modelConfig/
+        #for f in *.gen; do
+        #  mv -- "$f" "${f%.xml.gen}.xml"
+        #done
+      #fi
+      #Finally set the npm folder and permissions to enable npm install
+      echo >&2 "Checking if NPM folder exists"
+      if [ ! -d /var/www/.npm ]; then
+        mkdir -p /var/www/.npm
+        chown -R www-data:www-data /var/www/.npm
+      fi
 
-    echo >&2 "Now we configure the Gitify command "
-    # mkdir $TMP_STORE
-    git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
-    cd $TMP_STORE/Gitify
-    composer install --no-dev
+      echo >&2 "Checking if packages folder exists"
+      if [ ! -d /var/www/packages ]; then
+        git clone https://github.com/theboxer/Git-Package-Management.git /var/www/packages/gpm
+        cd /var/www/packages/gpm/core/components/gpm
+        composer install
+        cd /var/www/packages/gpm/bin
+        chmod +x ./gpm
 
-    chmod +x bin/gitify
-    cd /usr/bin/
-    ln -s /tmp/modx/Gitify/bin/gitify Gitify
-    cd /var/www/html/
-    # since its a new modx isntallation, use the default gitify file
-    cp $TMP_STORE/.gitify .
-    # first we check that there's a gitify configuration
-    if [ -e .gitify  ]; then
-      Gitify package:install --all
-      #This section was used to load the project database
-      #cd /var/www/html/modxMonster/modelConfig/
-      #for f in *.gen; do
-      #  mv -- "$f" "${f%.xml.gen}.xml"
-      #done
+        chown -R www-data:www-data /var/www/.npm
+      fi
+
     fi
-    #Finally set the npm folder and permissions to enable npm install
-    mkdir /var/www/.npm
-    chown -R www-data:www-data /var/www/.npm
+
+
+
   # fi
   else
     echo >&2 "Modx its installed, checking for Gitify installation"
