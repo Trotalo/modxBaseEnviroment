@@ -142,31 +142,48 @@ EOF
     mv /var/www/html/.htaccess /var/www/html/.htaccess.base
     cp -rfp $HT_FILENAME /var/www/html/
     chown www-data:www-data $HT_FILENAME
+    echo >&2 "Check if gitify is present"
+    if [ ! -d "$TMP_STORE/Gitify" ]; then
+      echo "$TMP_STORE/Gitify does not exist."
+      echo >&2 "Now we configure the Gitify command "
+      # mkdir $TMP_STORE
+      git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
+      cd $TMP_STORE/Gitify
+      composer install --no-dev
+      chmod +x bin/gitify
+      # since its a new modx isntallation, use the default gitify file
+      cp $TMP_STORE/.gitify .
+      # first we check that there's a gitify configuration
+      #if [ -e .gitify  ]; then
+        # Gitify package:install --all
+        #This section was used to load the project database
+        #cd /var/www/html/modxMonster/modelConfig/
+        #for f in *.gen; do
+        #  mv -- "$f" "${f%.xml.gen}.xml"
+        #done
+      #fi
+      #Finally set the npm folder and permissions to enable npm install
+      echo >&2 "Checking if NPM folder exists"
+      if [ ! -d /var/www/.npm ]; then
+        mkdir -p /var/www/.npm
+        chown -R www-data:www-data /var/www/.npm
+      fi
 
-    echo >&2 "Now we configure the Gitify command "
-    # mkdir $TMP_STORE
-    git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
-    cd $TMP_STORE/Gitify
-    composer install --no-dev
+      echo >&2 "Checking if packages folder exists"
+      if [ ! -d /var/www/packages ]; then
+        git clone https://github.com/theboxer/Git-Package-Management.git /var/www/packages/gpm
+        cd /var/www/packages/gpm/core/components/gpm
+        composer install
+        cd /var/www/packages/gpm/bin
+        chmod +x ./gpm
 
-    chmod +x bin/gitify
-    cd /usr/bin/
-    ln -s /tmp/modx/Gitify/bin/gitify Gitify
-    cd /var/www/html/
-    # since its a new modx isntallation, use the default gitify file
-    cp $TMP_STORE/.gitify .
-    # first we check that there's a gitify configuration
-    if [ -e .gitify  ]; then
-      Gitify package:install --all
-      #This section was used to load the project database
-      #cd /var/www/html/modxMonster/modelConfig/
-      #for f in *.gen; do
-      #  mv -- "$f" "${f%.xml.gen}.xml"
-      #done
+        chown -R www-data:www-data /var/www/.npm
+      fi
+
     fi
-    #Finally set the npm folder and permissions to enable npm install
-    mkdir /var/www/.npm
-    chown -R www-data:www-data /var/www/.npm
+
+
+
   # fi
   else
     echo >&2 "Modx its installed, checking for Gitify installation"
