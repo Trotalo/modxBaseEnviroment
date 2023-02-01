@@ -40,6 +40,7 @@ RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgm
     && rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h \
 	#&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
+
 	&& docker-php-ext-install gd soap opcache mysqli pdo pdo_mysql gmp zip \
 	&& curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
