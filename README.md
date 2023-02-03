@@ -1,7 +1,7 @@
 # About this Repo
 
 This repository holds the docker-compose configuration intended to run a 
-modX development environment, from the basic infrastructure needed, to 
+MODX3 development environment, from the basic infrastructure needed, to 
 the git life cycle, all the needed components to get you up and running
 developing modX extras.
 
