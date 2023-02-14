@@ -25,6 +25,7 @@ services:
       MODX_ADMIN_PASSWORD: admin
       MODX_ADMIN_EMAIL: admin@admin.com
       MODX_SERVER_ROUTE: 192.168.0.107
+      WSLIP: 172.17.0.1
     volumes:
       - './www:/var/www'
     deploy:
@@ -33,7 +34,7 @@ services:
           cpus: '0.5'
           memory: 1024M
   db:
-    image: 'mariadb:10.1'
+    image: 'mysql:8.0.22'
     environment:
       MYSQL_ROOT_PASSWORD: mysql
       MYSQL_DATABASE: modx
@@ -43,7 +44,7 @@ services:
       - '3306:3306'
     command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - './mariadb:/var/lib/mysql'
+      - './mysql:/var/lib/mysql'
     deploy:
       resources:
         limits:

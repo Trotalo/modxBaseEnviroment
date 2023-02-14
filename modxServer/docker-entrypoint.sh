@@ -142,44 +142,27 @@ EOF
     mv /var/www/html/.htaccess /var/www/html/.htaccess.base
     cp -rfp $HT_FILENAME /var/www/html/
     chown www-data:www-data $HT_FILENAME
-    echo >&2 "Check if gitify is present"
-    if [ ! -d "$TMP_STORE/Gitify" ]; then
-      echo "$TMP_STORE/Gitify does not exist."
-      echo >&2 "Now we configure the Gitify command "
-      # mkdir $TMP_STORE
-      git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
-      cd $TMP_STORE/Gitify
-      composer install --no-dev
-      chmod +x bin/gitify
-      # since its a new modx isntallation, use the default gitify file
-      cp $TMP_STORE/.gitify .
-      # first we check that there's a gitify configuration
-      #if [ -e .gitify  ]; then
-        # Gitify package:install --all
-        #This section was used to load the project database
-        #cd /var/www/html/modxMonster/modelConfig/
-        #for f in *.gen; do
-        #  mv -- "$f" "${f%.xml.gen}.xml"
-        #done
-      #fi
-      #Finally set the npm folder and permissions to enable npm install
-      echo >&2 "Checking if NPM folder exists"
-      if [ ! -d /var/www/.npm ]; then
-        mkdir -p /var/www/.npm
-        chown -R www-data:www-data /var/www/.npm
-      fi
+    echo >&2 "Installing Gitify...."
+    composer global config minimum-stability alpha
+    composer global require modmore/gitify:^2
 
-      echo >&2 "Checking if packages folder exists"
-      if [ ! -d /var/www/packages ]; then
-        git clone https://github.com/theboxer/Git-Package-Management.git /var/www/packages/gpm
-        cd /var/www/packages/gpm/core/components/gpm
-        composer install
-        cd /var/www/packages/gpm/bin
-        chmod +x ./gpm
 
-        chown -R www-data:www-data /var/www/.npm
-      fi
+    echo >&2 "Checking if NPM folder exists"
+    if [ ! -d /var/www/.npm ]; then
+      mkdir -p /var/www/.npm
+      chown -R www-data:www-data /var/www/.npm
+    fi
 
+    echo >&2 "Checking for GPM command......"
+    if ! [ -e '/var/www/html/gpm' ]; then
+      echo >&2 "GPM command NOT FOUND, Installing ......"
+      git clone https://github.com/theboxer/Git-Package-Management.git /var/www/html/gpm
+      cd /var/www/html/gpm/core/components/gpm
+      composer install
+      cd /var/www/html/gpm/bin/
+      chmod +x ./gpm
+      echo "export PATH=/var/www/html/gpm/bin:$PATH" >> ~/.profile
+      source ~/.profile
     fi
 
 
@@ -187,21 +170,19 @@ EOF
   # fi
   else
     echo >&2 "Modx its installed, checking for Gitify installation"
-    if ! [ -e $TMP_STORE/Gitify ]; then
-      echo >&2 "Installing Gitify command......"
-      # mkdir $TMP_STORE
-      git clone https://github.com/modmore/Gitify.git $TMP_STORE/Gitify
-      cd $TMP_STORE/Gitify
-      if (composer install --no-dev) then
-        echo >&2 "Worked at first"
-      else
-        echo >&2 "updating file and reinstalling"
-        mv $TMP_STORE/Gitify/vendor/kbjr/git.php/Git.php $TMP_STORE/Gitify/vendor/kbjr/git.php/git.php
-        composer install --no-dev
-      fi
-      chmod +x bin/gitify
-      cd /usr/bin/
-      ln -s /tmp/modx/Gitify/bin/gitify Gitify
+    echo >&2 "Installing Gitify...."
+    composer global config minimum-stability alpha
+    composer global require modmore/gitify:^2
+
+    if ! [ -e '/var/www/html/gpm' ]; then
+      echo >&2 "Installing GPM command......"
+      git clone https://github.com/theboxer/Git-Package-Management.git /var/www/html/gpm
+      cd /var/www/html/gpm/core/components/gpm
+      composer install
+      cd /var/www/html/gpm/bin/
+      chmod +x ./gpm
+      echo "export PATH=/var/www/html/gpm/bin:$PATH" >> ~/.profile
+      source ~/.profile
     fi
   fi
 fi
