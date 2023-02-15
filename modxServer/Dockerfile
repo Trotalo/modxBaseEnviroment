@@ -52,20 +52,24 @@ RUN chown -R www-data:www-data /var/www/
 
 USER www-data
 RUN export XDG_CONFIG_HOME=$TMP_STORE \
-    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-
-#RUN chown -R www-data:www-data $NVM_DIR
-
-RUN source $NVM_DIR/nvm.sh \
+    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+    && source $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \
     && nvm use default
 
+#RUN chown -R www-data:www-data $NVM_DIR
+
+#RUN source $NVM_DIR/nvm.sh \
+ #   && nvm install $NODE_VERSION \
+  #  && nvm alias default $NODE_VERSION \
+   # && nvm use default
+
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-RUN npm install -g @vue/cli \
-    && npm install -g vue
+RUN npm install -g @vue/cli
+#RUN npm i -g @quasar/cli
 
 USER root
 # Configure
