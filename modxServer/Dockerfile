@@ -1,3 +1,8 @@
+FROM php:8.1-rc-apache AS download
+
+RUN test -f ./installers/modx-${MODX_VERSION}-pl.zip || curl -o ./installers/modx-${MODX_VERSION}-pl.zip http://modx.com/download/direct/modx-${MODX_VERSION}-pl.zip
+
+
 FROM php:8.1-rc-apache
 
 LABEL MODX_BASE_ENVIROMENT=1.0
@@ -36,7 +41,21 @@ RUN echo "Running development enviroment" \
     && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 # install the PHP extensions we need
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgmp-dev libxml2-dev git default-mysql-client vim libzip-dev zip net-tools iputils-ping \
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    unzip \
+    sudo \
+    libgmp-dev \
+    libxml2-dev \
+    git \
+    default-mysql-client \
+    vim \
+    libzip-dev \
+    zip \
+    net-tools \
+    iputils-ping \
+    tzdata \
     && rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h \
 	#&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
@@ -47,6 +66,15 @@ RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev unzip sudo libgm
 
 ENV NVM_DIR $TMP_STORE/nvm
 ENV NODE_VERSION 16.15.0
+
+###########################################################################
+# Set Timezone
+###########################################################################
+#ARG TZ=UTC
+#ENV TZ ${TZ}
+#RUN ntpdate pool.ntp.org
+#RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 
 RUN chown -R www-data:www-data /var/www/
 
@@ -96,10 +124,8 @@ RUN { \
 	} > /usr/local/etc/php/conf.d/datetime.ini
 # https://modx.com/download/direct/modx-3.0.1-pl.zip
 # Download specified modx version ${MODX_VERSION}
-ADD ./installers/modx-3.0.3-pl.zip ./modx.zip
+ADD ./installers/modx-${MODX_VERSION}-pl.zip ./modx.zip
 
-#RUN curl -o modx.zip -SL http://modx.com/download/direct/modx-${MODX_VERSION}-pl.zip \
-	#&& echo "$MODX_SHA1 *modx.zip" | sha1sum -c - \
 RUN unzip -q modx.zip -d /usr/src \
   && mv /usr/src/modx-${MODX_VERSION}-pl /usr/src/modx \
   && find /usr/src/modx -name 'ht.access' -exec bash -c 'mv $0 ${0/ht.access/.htaccess}' {} \; \
