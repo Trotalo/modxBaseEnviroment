@@ -123,7 +123,7 @@ EOPHP
 	<cmspassword>$MODX_ADMIN_PASSWORD</cmspassword>
 	<cmsadminemail>$MODX_ADMIN_EMAIL</cmsadminemail>
 
-	<core_path>/var/www/html/core</core_path>
+	<core_path>/var/www/html/core/</core_path>
 	<context_mgr_path>/var/www/html/manager/</context_mgr_path>
 	<context_mgr_url>/manager/</context_mgr_url>
 	<context_connectors_path>/var/www/html/connectors/</context_connectors_path>
