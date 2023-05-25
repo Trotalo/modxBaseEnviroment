@@ -12,6 +12,7 @@ services:
       - '80:80'
       - '8080:8080'
       - '9090:9090'
+      - '5173:5173'
     environment:
       XDEBUG_SESSION: wtf
       MODX_VERSION: 2.8.1
@@ -26,6 +27,7 @@ services:
       MODX_ADMIN_EMAIL: admin@admin.com
       MODX_SERVER_ROUTE: 192.168.0.107
       WSLIP: 172.17.0.1
+      TZ: America/Bogota
     volumes:
       - './www:/var/www'
     deploy:
