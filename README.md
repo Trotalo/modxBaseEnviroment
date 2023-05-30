@@ -59,16 +59,16 @@ Please follow the next steps to set up a local development environment.
    - Go to BcsPlatform/www/html and download this repo:    
      `git clone git@github.com:Trotalo/BCSPlatform.git bcs`
    - Use GPM to install the BCS package, open the MODX manager and install the package
-     ![open GPM](./development/openGPM.png)
-     ![install package](./development/installBCS.png)
+     ![open GPM](./design/development/openGPM.png)
+     ![install package](./design/development/installBCS.png)
    - Now install the BCS database:
-     ![open GPM](./development/installTheDataBase.png)
+     ![open GPM](./design/development/installTheDataBase.png)
    - Finally, using your favorite SQL tool, check that all the tables were created  
-     ![crated tables](./development/checkTheDB.png)
+     ![crated tables](./design/development/checkTheDB.png)
 
 ### Project structure
 Here we describe the different folders inside the project and where the different parts of the code should be located
-![folders structure](./development/folderStructure.png )
+![folders structure](./design/development/folderStructure.png )
 
 ### Developing features
 - Before starting any work, create a separate branch to keep track of your changes, and assign a branch_name based on the
