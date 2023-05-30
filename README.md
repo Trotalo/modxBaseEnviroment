@@ -27,7 +27,7 @@ developing modX extras.
 
 ## Development environment
 
-Looking to standardize environments and avoid the classical "it runs on my machine." we have based the project on a Docker container. Following are the steps needed to set up a development environment for the BCSPlatform.
+Looking to standardize environments and avoid the classical "it runs on my machine." we have based the project on a Docker container. Following are the steps needed to set up a development environment for any project, in this case will be using the BCSPlatform as an example, you'll only need to change the names.
 
 Please follow the next steps to set up a local development environment.
 
