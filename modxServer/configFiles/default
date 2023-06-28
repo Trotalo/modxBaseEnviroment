@@ -33,4 +33,7 @@
   SSLEngine on
   SSLCertificateFile /etc/apache2/ssl/ssl.crt
   SSLCertificateKeyFile /etc/apache2/ssl/ssl.key
+  <IfModule mod_headers.c>
+      Header unset Upgrade
+  </IfModule>
 </VirtualHost>
