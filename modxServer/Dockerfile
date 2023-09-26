@@ -1,15 +1,5 @@
-FROM php:8.1-rc-apache AS download
-
-RUN test -f ./installers/modx-${MODX_VERSION}-pl.zip || curl -o ./installers/modx-${MODX_VERSION}-pl.zip http://modx.com/download/direct/modx-${MODX_VERSION}-pl.zip
-
-
 FROM php:8.1-rc-apache
 
-LABEL MODX_BASE_ENVIROMENT=1.0
-
-LABEL description="Image based up ont https://github.com/modxcms/docker-modx to a basic image to work on a modxMoster project"
-
-#Arguments and variables definitions
 ARG MODX_VERSION=3.0.3
 ARG MODX_SHA1=7dd95a25be5989a03ce58ef77adce79b341aa1f4
 ARG MODX_SERVER_ROUTE=192.168.0.107
@@ -22,6 +12,13 @@ ENV CORE_BACKUP=$CORE_BACKUP_ARG
 ENV HT_FILENAME=$TMP_STORE/siteConfig/.htaccess
 ENV DB_FILENAME=$TMP_STORE/siteConfig/modx.sql
 
+LABEL MODX_BASE_ENVIROMENT=1.0
+
+LABEL description="Image based up ont https://github.com/modxcms/docker-modx to a basic image to work on a modxMoster project"
+
+#RUN test -f ./modxServer/installers/modx-3.0.3-pl.zip || wget http://modx.com/download/direct/modx-3.0.3-pl.zip -P ./modxServer/installers/
+
+#Arguments and variables definitions
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN a2enmod rewrite
@@ -56,6 +53,17 @@ RUN apt-get update && apt-get install -y \
     net-tools \
     iputils-ping \
     tzdata \
+    libgtk2.0-0 \
+    libgtk-3-0 \
+    libgbm-dev \
+    libnotify-dev \
+    libgconf-2-4 \
+    libnss3 \
+    libxss1 \
+    libasound2 \
+    libxtst6 \
+    xauth \
+    xvfb \
     && rm -rf /var/lib/apt/lists/* \
 	&& ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h \
 	#&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
@@ -65,7 +73,7 @@ RUN apt-get update && apt-get install -y \
 
 
 ENV NVM_DIR $TMP_STORE/nvm
-ENV NODE_VERSION 16.15.0
+ENV NODE_VERSION 18.17.1
 
 ###########################################################################
 # Set Timezone
@@ -80,7 +88,7 @@ RUN chown -R www-data:www-data /var/www/
 
 USER www-data
 RUN export XDG_CONFIG_HOME=$TMP_STORE \
-    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
     && source $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \
