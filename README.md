@@ -25,51 +25,92 @@ developing modX extras.
 5. Go to Docker -> dashboard -> settings -> resources, and check that your new ubuntu image is listed, the click the switch next to it, and we'll be ready to go!
 
 
-## Using this image
-Once you run the image, the current html and mysql folders are going to get 
-populated with all the files for modx installation as well as mysql system files.
+## Development environment
 
-1. Configure environment variables: Inside the docker-compose.yml 
-   file your can find the different values that can be configured for the images.  
-   You need to look for the `MODX_SERVER_ROUTE` key, and update the ip address with the one assigned to your ubuntu instance, for this go to ubuntu and type
-   `ifconfig`  
-   Also make sure the routes assigned for `volumes` are set up correctly, an example of such route could be `~/development/modxBasicExtra/html:/var/www/html`
-   
-2. Build the containers
-```sh
-docker-compose build
-```
+Looking to standardize environments and avoid the classical "it runs on my machine." we have based the project on a Docker container. Following are the steps needed to set up a development environment for any project, in this case will be using the BCSPlatform as an example, you'll only need to change the names.
 
-3. Run the containers
-```sh
-docker-compose up
-```
+Please follow the next steps to set up a local development environment.
 
-4. The first time you'll run the container it'll take some time while it 
-   downloads and installs the different components, at the end you should see
-   a line similar to this one
-```sh
-web_1  | [Thu Jan 14 13:27:32.027113 2021] [core:notice] [pid 1] AH00094: Command line: 'apache2 -D FOREGROUND'
-```   
+- Make sure you have installed Docker Desktop
+- Open a terminal
+- Run:  
+  `git clone git@github.com:Trotalo/modxBaseEnviroment.git BcsPlatform`
+- Enter the project folder:  
+  `cd BcsPlatform`
+- Download the appropriate MODX version  
+  `wget http://modx.com/download/direct/modx-3.0.3-pl.zip -P ./modxServer/installers/`
+- Build the project images:    
+  `docker-compose build`
+- Run the project images. The next command will launch the server, be patient. The first time can take some time to start
+  leave the tab open to keep the server running and be able to see the server output:    
+  `docker-compose up`
+- Open a browser and type the following url:   
+  `https://localhost/manager/`  
+  It should take you to the MODX manager. You can log in using admin/admin as credentials
+- Update systems permissions:  
+  `cd BcsPlatform/www`  
+  `sudo chown -R www-data:www-data *`  
+  `sudo chmod -R 0777 * `
 
-5. Check that everything is working as expected, for this open `https://MODX_SERVER_ROUTE/`
-replace the x's with your actual ip address.
+- Now we are going to install [GPM](https://github.com/theboxer/Git-Package-Management/tree/3.x). This is  
+  a tool that allows us to package our work as a MODX extra, which enables simpler version management as well as ease of installation.
+   - Open a new terminal, go to your project route and run:  
+     `docker exec bcsplatform-web-1 /bin/bash -c "./gpm/bin/gpm gpm:install --corePath=/var/www/html/core"`
+   - Go to BcsPlatform/www/html and download this repo:    
+     `git clone git@github.com:Trotalo/BCSPlatform.git bcs`
+   - Use GPM to install the BCS package, open the MODX manager and install the package
+     ![open GPM](./design/development/openGPM.png)
+     ![install package](./design/development/installBCS.png)
+   - Now install the BCS database:
+     ![open GPM](./design/development/installTheDataBase.png)
+   - Finally, using your favorite SQL tool, check that all the tables were created  
+     ![crated tables](./design/development/checkTheDB.png)
 
-## Developing with this image
+### Project structure
+Here we describe the different folders inside the project and where the different parts of the code should be located
+![folders structure](./design/development/folderStructure.png )
 
-1. After the installation its completed, we are ready to start developing, 
-for this, start by adding this folder to your preferred IDE
-2. Create any element needed inside the ModX admin, and once you are finished,
-open a terminal and run:  
-`docker exec -ti modxbaseenviroment_web_1 sh -c "cd /var/www/html && Gitify extract"`
-3. You'll see a new `_data` folder inside the html folder, there you can find
-all the plain files extracted from ModX for you to work directly with your preferred IDE
-4. When you are done with the changes on the files, run the command:  
-`docker exec -ti modxbaseenviroment_web_1 sh -c "cd /var/www/html && Gitify build && rm -fr /var/www/html/core/cache"`  
-This will have your changes commited into ModX.  
-Depending on the IDE you are using, you can add this command as an action
-when you press the save button, for example for VSCode, you can follow 
-[this tutorial](https://medium.com/better-programming/automatically-execute-bash-commands-on-save-in-vs-code-7a3100449f63)
-to have the command called everytime you save a file in your IDE.
-5. Make sure to add the `_data` folder to git and commit those to the repo.
-6. Follow the standard GIT workflow defined on the best practices manual.
+### Developing features
+- Before starting any work, create a separate branch to keep track of your changes, and assign a branch_name based on the
+  requirement you are working.  
+  `git checkout -b branch_name`  
+  Make the changes on your branch, and create multiple commits according to your work.
+
+- Make sure you can generate a proper zip file for the extra, for this go to the GPM section on the manager, and select
+  the build option:
+  ![build the extra](./design/development/buildTheExtra.png)
+
+- Check that the build was successful:  
+  ![succesful build](./design/development/buildSuccess.png)
+
+- Check that the zip file was generated:  
+  ![succesful build](./design/development/valdiatePackage.png)
+
+- If everything is fine, push your changes. Make sure NOT TO PUSH THE ZIP FILE  
+  `git push origin branch_name`
+
+- Once you are done, create a pull request to add your changes to the master branch.
+
+### Deploying to production
+
+To ease the process of moving new versions to production, we use simple MODX transport packages, where we use the zip file
+we generated on the previous steps and use it to install the BCSPlatform on any MODX instance.
+
+- If you are doing an update instead of a clean installation, make sure to backup your information before installing the new
+  version.
+
+- Open the installation extras page inside the MODX manager.  
+  ![1 step](./design/deployment/1openInstaller.png)
+
+- Upload the zip file we generated on the previous step.  
+  ![1 step](./design/deployment/2UploadPackage.png)
+
+- Select the file  
+  ![1 step](./design/deployment/3SelectFile.png)
+
+- Install the package
+  ![1 step](./design/deployment/4Install.png)
+
+- Once you are done, if you were doing an version change, update the database with your latest backup
+
+**ON DEVELOPMENT, WE CAN ADD A FEATURE TO THE TRANSPORT PACKAGE TO AUTOMATE BACKUP ON VERSION CHANGES**
